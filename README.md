@@ -1,79 +1,65 @@
-🌐 Asset Tokenization Blockchain Demo
-Token hóa tài sản thực lên Ethereum + FastAPI Backend + IPFS (Pinata) + Frontend UI
+# 🌐 **Asset Tokenization Blockchain Demo**  
+### Token hóa tài sản thực lên Ethereum · FastAPI Backend · IPFS (Pinata) · Minimal Frontend UI
+
 <div align="center">
-
-
-
-
-
+  <img src="https://img.shields.io/badge/Ethereum-Sepolia-blue?logo=ethereum" />
+  <img src="https://img.shields.io/badge/FastAPI-Backend-green?logo=fastapi" />
+  <img src="https://img.shields.io/badge/IPFS-Pinata-orange?logo=ipfs" />
+  <img src="https://img.shields.io/badge/Solidity-Smart%20Contract-black?logo=solidity" />
 </div>
 
-📘 Giới thiệu
-Dự án này minh họa cách token hóa một tài sản thành NFT thông qua:
+---
 
+## 📘 **Giới thiệu**
 
-Smart contract chuẩn ERC-721
+Dự án minh họa quy trình **token hóa tài sản** bằng cách:
 
+- ✔ Deploy smart contract chuẩn **ERC-721**
+- ✔ Lưu metadata/IPFS qua **Pinata**
+- ✔ Backend Python FastAPI xử lý:
+  - đăng ký tài sản
+  - xác thực tài sản
+  - truy vấn tài sản
+- ✔ Frontend HTML đơn giản cho người dùng cuối
 
-Lưu metadata/IPFS bằng Pinata
+---
 
+## 🗂️ **Mục lục**
 
-Backend Python xử lý đăng ký/verify/lấy thông tin tài sản
+- 🎯 Mục tiêu
+- 📁 Cấu trúc thư mục
+- ⚙️ Cài đặt môi trường
+- 🔐 Thiết lập biến môi trường (.env)
+- 🧱 Deploy Smart Contract
+- 🐍 Chạy Backend FastAPI
+- 🌐 Chạy Frontend
+- 🧪 Test API
+- 📤 Push code lên GitHub
+- 🛑 Lưu ý bảo mật
 
+---
 
-Frontend HTML đơn giản để tương tác người dùng
+## 🎯 **Mục tiêu**
 
+Hệ thống cho phép:
 
+- ✔ Đăng ký tài sản → lưu metadata lên IPFS → ghi thông tin vào blockchain  
+- ✔ Xác thực tài sản → cập nhật trạng thái on-chain  
+- ✔ Lấy thông tin tài sản → trả về metadata + NFT `tokenId`  
+- ✔ Tự động **mint NFT** khi đăng ký
 
-🗂️ Mục lục
+---
 
+## 📁 **Cấu trúc thư mục**
 
-🎯 Mục tiêu
-
-
-📁 Cấu trúc thư mục
-
-
-⚙️ Cài đặt môi trường
-
-
-🔐 Thiết lập biến môi trường (.env)
-
-
-🧱 Deploy Smart Contract
-
-
-🐍 Chạy backend FastAPI
-
-
-🌐 Chạy frontend UI
-
-
-🧪 Test API
-
-
-📤 Push code lên GitHub
-
-
-🛑 Lưu ý bảo mật
-
-
-
-🎯 Mục tiêu
-Hệ thống này cho phép:
-✔ Đăng ký tài sản → tạo metadata → upload IPFS → ghi lên blockchain
-✔ Xác thực tài sản → update on-chain
-✔ Truy vấn tài sản → trả về metadata + NFT tokenId
-✔ Mint NFT khi đăng ký mới
-
-📁 Cấu trúc thư mục
+```
 asset-tokenization/
 │
 ├── contracts/                # Solidity Smart Contracts
 ├── scripts/                  # Hardhat deploy scripts
-├── artifacts/                # ABI
+├── artifacts/                # ABI sinh ra bởi Hardhat
 │
-├── py/                       # Backend FastAPI
+├── py/                       # Backend FastAPI (Python)
 │   ├── server.py
 │   ├── ipfs_client.py
 │   ├── util_contract.py
@@ -81,28 +67,42 @@ asset-tokenization/
 │   ├── .env.example
 │
 ├── web/                      # Frontend UI
-│   ├── index.html
-│   ├── verify.html
-│   ├── get.html
+│   ├── index.html            # Register
+│   ├── verify.html           # Verify
+│   ├── get.html              # Get asset
 │
 ├── hardhat.config.js
 ├── package.json
 ├── README.md
+```
 
+---
 
-⚙️ Cài đặt môi trường
-1️⃣ Clone project
-git clone https://github.com/<your-username>/<repo-name>.git
+## ⚙️ **Cài đặt môi trường**
+
+### 1️⃣ Clone project
+
+```bash
+git clone https://github.com/<your-username>/<repo>.git
 cd asset-tokenization
+```
 
+---
 
-🔐 Thiết lập biến môi trường .env
-📍 1. Root .env (Hardhat)
+## 🔐 **Thiết lập biến môi trường (.env)**
+
+### 📍 1. Root `.env` (Hardhat deployment)
+
+```
 SEPOLIA_RPC=https://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>
 PRIVATE_KEY=0xYOUR_PRIVATE_KEY
+```
 
+---
 
-📍 2. Backend py/.env
+### 📍 2. Backend `py/.env`
+
+```
 SEPOLIA_RPC=https://eth-sepolia.g.alchemy.com/v2/<YOUR_API_KEY>
 PRIVATE_KEY=0xYOUR_PRIVATE_KEY
 
@@ -112,9 +112,13 @@ NFT_ADDRESS=0x...
 PINATA_API_KEY=
 PINATA_SECRET_API_KEY=
 PINATA_JWT=
+```
 
+---
 
-📍 3. Backend py/.env.example (an toàn để push)
+### 📍 3. Backend `py/.env.example`
+
+```
 SEPOLIA_RPC=
 PRIVATE_KEY=
 
@@ -124,71 +128,153 @@ NFT_ADDRESS=
 PINATA_API_KEY=
 PINATA_SECRET_API_KEY=
 PINATA_JWT=
+```
 
+---
 
-🧱 Deploy Smart Contract
-Cài dependencies
+## 🧱 **Deploy Smart Contract**
+
+### Cài Hardhat dependencies:
+
+```bash
 npm install
+```
 
-Deploy lên Sepolia
+### Deploy contract lên Sepolia:
+
+```bash
 npx hardhat run scripts/deploy.js --network sepolia
+```
 
-Sau khi deploy, copy 2 địa chỉ contract:
-Registry: 0xABC...
-NFT:      0xDEF...
+📌 Output sau deploy:
 
-→ Đặt vào py/.env.
+```
+Registry deployed → 0xABC...
+NFT deployed → 0xDEF...
+```
 
-🐍 Chạy Backend FastAPI
-Tạo virtual env
+→ Dán vào `py/.env`.
+
+---
+
+## 🐍 **Chạy Backend FastAPI**
+
+### Tạo virtual env:
+
+```bash
 cd py
 python -m venv .venv
-.\.venv\Scripts\activate
+.\.venv\Scriptsctivate
+```
+
+### Cài Python dependencies:
+
+```bash
 pip install -r requirements.txt
+```
 
-Run server
+### Chạy backend:
+
+```bash
 uvicorn server:app --reload
+```
 
-Backend hoạt động tại:
-👉 http://127.0.0.1:8000
+🟢 Backend chạy tại:
 
-🌐 Chạy Frontend
+```
+http://127.0.0.1:8000
+```
+
+---
+
+## 🌐 **Chạy Frontend**
+
 Không cần cài gì.
-Chỉ mở:
 
+Mở các file:
 
-web/index.html → Register Asset
+- `web/index.html`  
+- `web/verify.html`  
+- `web/get.html`  
 
+👉 Gợi ý: dùng **Live Server** trong VSCode.
 
-web/verify.html → Verify Asset
+---
 
+## 🧪 **Test API**
 
-web/get.html → Get Asset
+### 1️⃣ Register Asset
 
-
-Để đẹp hơn, dùng Live Server trong VSCode.
-
-🧪 Test API
-1️⃣ Register Asset
+```http
 POST /asset/register
+```
 
+Body:
+
+```json
 {
   "asset_key": "asset_demo_001",
   "owner_name": "Alice",
   "content": "Sample asset"
 }
+```
 
-2️⃣ Verify Asset
+---
+
+### 2️⃣ Verify Asset
+
+```http
 POST /asset/verify
+```
 
+Body:
+
+```json
 {
   "asset_key": "asset_demo_001",
   "status": true
 }
+```
 
-3️⃣ Get Asset
+---
+
+### 3️⃣ Get Asset
+
+```http
 GET /asset/get?asset_key=asset_demo_001
+```
 
+---
 
+## 📤 **Push Code Lên GitHub**
 
+### Nếu gặp lỗi:
+
+```
+! [rejected] main -> main (fetch first)
+```
+
+Chạy:
+
+```bash
+git pull origin main --rebase
+git push origin main
+```
+
+Hoặc **force push**:
+
+```bash
+git push origin main --force
+```
+
+---
+
+## 🛑 **Lưu ý bảo mật**
+
+- ❗ Không push `PRIVATE_KEY` lên GitHub  
+- Chỉ commit `.env.example`  
+- Nếu lỡ push private key → **revoke ngay trong Alchemy**  
+- Không dùng ví thật
+
+---
 
