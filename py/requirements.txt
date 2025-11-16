@@ -1,0 +1,7 @@
+fastapi==0.115.5
+uvicorn==0.32.0
+web3==6.20.1
+python-dotenv==1.0.1
+requests==2.32.3
+streamlit==1.39.0
+python-multipart

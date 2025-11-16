@@ -1,0 +1,8 @@
+.env
+py/.env
+py/.env.example
+node_modules/
+artifacts/
+cache/
+.venv/
+__pycache__/
