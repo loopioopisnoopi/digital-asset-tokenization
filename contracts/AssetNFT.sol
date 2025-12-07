@@ -12,7 +12,9 @@ contract AssetNFT is ERC721, Ownable {
 
     function mint(address to, string memory tokenURI_) external returns (uint256) {
         uint256 tid = ++nextTokenId;
-        _safeMint(to, tid);
+        // Use _mint instead of _safeMint so contracts (like AssetRegistry) that do not implement
+        // IERC721Receiver can still receive the minted token. Registry manages custody.
+        _mint(to, tid);
         _tokenURIs[tid] = tokenURI_;
         return tid;
     }
