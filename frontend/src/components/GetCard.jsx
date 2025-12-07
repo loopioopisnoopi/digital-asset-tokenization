@@ -2,11 +2,16 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { API_BASE } from '../App'
 
-export default function GetCard() {
+export default function GetCard({ currentAddress }) {
   const [assetKey, setAssetKey] = useState('asset_demo_001')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [toAddress, setToAddress] = useState('')
+  const [transferTx, setTransferTx] = useState('')
+  const [transferLoading, setTransferLoading] = useState(false)
+  const [transferError, setTransferError] = useState('')
+  const [ownerPrivateKey, setOwnerPrivateKey] = useState('')
 
   const handleGet = async () => {
     if (!assetKey) {
@@ -26,6 +31,37 @@ export default function GetCard() {
       setError(e.response?.data?.detail || 'Không tìm thấy tài sản hoặc lỗi truy vấn')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const isOwner = (owner) => {
+    try {
+      return currentAddress && owner && currentAddress.toLowerCase() === owner.toLowerCase()
+    } catch (e) {
+      return false
+    }
+  }
+
+  const handleTransfer = async () => {
+    if (!toAddress) {
+      setTransferError('Vui lòng nhập địa chỉ nhận (to_address).')
+      return
+    }
+    setTransferError('')
+    setTransferLoading(true)
+    try {
+      const form = new FormData()
+      form.append('asset_key', assetKey)
+      form.append('to_address', toAddress)
+      if (currentAddress) form.append('user_address', currentAddress)
+      if (ownerPrivateKey) form.append('owner_private_key', ownerPrivateKey)
+      const res = await axios.post(`${API_BASE}/asset/transfer`, form)
+      setTransferTx(res.data.tx || res.data.tx_hash || 'Đã gửi giao dịch chuyển quyền.')
+    } catch (e) {
+      console.error(e)
+      setTransferError(e.response?.data?.detail || 'Chuyển quyền thất bại')
+    } finally {
+      setTransferLoading(false)
     }
   }
 
@@ -60,7 +96,7 @@ export default function GetCard() {
       </div>
 
       {result && (
-        <div className="mt-4 rounded-lg border border-violet-700/60 bg-violet-950/40 p-3 text-xs text-violet-50 space-y-1">
+        <div className="mt-4 rounded-lg border border-violet-700/60 bg-violet-950/40 p-3 text-xs text-violet-50 space-y-2">
           <div><span className="font-semibold">Owner:</span> {result.owner}</div>
           <div>
             <span className="font-semibold">Verified:</span>{' '}
@@ -82,6 +118,44 @@ export default function GetCard() {
               Mở tài sản trên IPFS
             </a>
           )}
+
+          {/* Transfer UI - only visible to asset owner */}
+          <div className="mt-3">
+            <div className="text-sm text-slate-300 mb-2">Chuyển quyền (chỉ owner)</div>
+            {!isOwner(result.owner) && (
+              <div className="mb-2 text-sm text-yellow-200">Bạn không phải owner. Chức năng transfer bị ẩn.</div>
+            )}
+            {isOwner(result.owner) && (
+              <div className="space-y-2">
+                <input
+                  value={toAddress}
+                  onChange={(e) => setToAddress(e.target.value)}
+                  placeholder="Địa chỉ nhận (to_address)"
+                  className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                />
+                <input
+                  value={ownerPrivateKey}
+                  onChange={(e) => setOwnerPrivateKey(e.target.value)}
+                  placeholder="Owner's private key (0x...)"
+                  type="password"
+                  className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                />
+                <div>
+                  <button
+                    onClick={handleTransfer}
+                    disabled={transferLoading}
+                    className="inline-flex items-center gap-2 rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-amber-400 disabled:opacity-60"
+                  >
+                    {transferLoading ? 'Đang gửi giao dịch...' : 'Chuyển quyền sở hữu'}
+                  </button>
+                </div>
+                {transferTx && (
+                  <div className="mt-2 font-mono text-xs break-all text-emerald-200">{transferTx}</div>
+                )}
+                {transferError && <div className="mt-2 text-xs text-red-400">{transferError}</div>}
+              </div>
+            )}
+          </div>
         </div>
       )}
 

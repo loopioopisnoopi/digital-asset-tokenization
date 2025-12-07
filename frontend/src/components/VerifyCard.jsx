@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { API_BASE } from '../App'
 
-export default function VerifyCard() {
+export default function VerifyCard({ isAdmin, currentAddress }) {
   const [assetKey, setAssetKey] = useState('asset_demo_001')
   const [status, setStatus] = useState(true)
   const [tx, setTx] = useState('')
@@ -20,6 +20,8 @@ export default function VerifyCard() {
       const form = new FormData()
       form.append('asset_key', assetKey)
       form.append('status', String(status))
+      // include admin address if provided (server-side will accept owner from env when missing)
+      if (currentAddress) form.append('user_address', currentAddress)
       const res = await axios.post(`${API_BASE}/asset/verify`, form)
       setTx(res.data.tx || res.data.tx_hash || 'Đã gửi giao dịch verify.')
     } catch (e) {
@@ -39,8 +41,14 @@ export default function VerifyCard() {
         Xác minh / thu hồi tài sản
       </h2>
       <p className="mt-1 text-sm text-slate-400">
-        Chỉ owner (địa chỉ deployer) mới có quyền verify hoặc unverify tài sản.
+        Chỉ admin (địa chỉ deployer) mới có quyền verify hoặc unverify tài sản.
       </p>
+
+      {!isAdmin && (
+        <div className="mt-3 rounded-md border border-yellow-700/30 bg-yellow-950/10 p-3 text-sm text-yellow-200">
+          Bạn không phải admin. Chức năng verify chỉ hiển thị cho admin.
+        </div>
+      )}
 
       <div className="mt-4 space-y-3 text-sm">
         <div>
@@ -63,7 +71,7 @@ export default function VerifyCard() {
         <div>
           <button
             onClick={handleVerify}
-            disabled={loading}
+            disabled={loading || !isAdmin}
             className="inline-flex items-center gap-2 rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-slate-950 hover:bg-amber-400 disabled:opacity-60"
           >
             {loading ? 'Đang gửi giao dịch...' : 'Gửi verify'}

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { API_BASE } from '../App'
 
-export default function RegisterCard() {
+export default function RegisterCard({ currentAddress }) {
   const [assetKey, setAssetKey] = useState('asset_demo_001')
   const [cid, setCid] = useState('')
   const [tx, setTx] = useState('')
@@ -20,6 +20,7 @@ export default function RegisterCard() {
       const form = new FormData()
       form.append('asset_key', assetKey)
       form.append('cid', cid)
+      if (currentAddress) form.append('user_address', currentAddress)
       const res = await axios.post(`${API_BASE}/asset/register`, form)
       setTx(res.data.tx || res.data.tx_hash || 'Đã gửi giao dịch.')
     } catch (e) {

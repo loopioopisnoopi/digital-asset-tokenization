@@ -30,22 +30,27 @@ contract AssetRegistry is Ownable {
         _;
     }
 
-    // 🟢 SỬA Ở ĐÂY: gọi luôn Ownable(msg.sender)
     constructor(address nftAddress) Ownable(msg.sender) {
         nft = IAssetNFT(nftAddress);
     }
 
-    function registerAsset(bytes32 assetHash, string calldata ipfsCid) external returns (uint256) {
+    // Anyone can register an asset. Provide `owner_` so backend can register on behalf of a user
+    // without needing the user's private key.
+    function registerAsset(bytes32 assetHash, string calldata ipfsCid, address owner_) external returns (uint256) {
         require(assetHash != bytes32(0), "Invalid hash");
         require(bytes(ipfsCid).length > 0, "Empty CID");
         require(assets[assetHash].owner == address(0), "Asset exists");
 
-        uint256 tid = nft.mint(msg.sender, string(abi.encodePacked("ipfs://", ipfsCid)));
+        // Mint NFT to this registry contract so the registry can manage transfers
+        uint256 tid = nft.mint(address(this), string(abi.encodePacked("ipfs://", ipfsCid)));
+
+        // record logical owner as provided by caller
+        address logicalOwner = owner_;
 
         assets[assetHash] = Asset({
             assetHash: assetHash,
             ipfsCid: ipfsCid,
-            owner: msg.sender,
+            owner: logicalOwner,
             verified: false,
             tokenId: tid
         });
@@ -76,7 +81,9 @@ contract AssetRegistry is Ownable {
     function transferAsset(bytes32 assetHash, address to) external onlyAssetOwner(assetHash) {
         require(to != address(0), "Zero address");
         Asset storage a = assets[assetHash];
-        address from = a.owner;
+        // The NFT itself is held by the registry contract (it was minted to address(this)).
+        // Update owner record first, then transfer the token from registry to the new owner.
+        address from = address(this);
         a.owner = to;
         nft.transferFrom(from, to, a.tokenId);
         emit AssetTransferred(assetHash, from, to, a.tokenId);
