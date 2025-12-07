@@ -11,6 +11,7 @@ export default function GetCard({ currentAddress }) {
   const [transferTx, setTransferTx] = useState('')
   const [transferLoading, setTransferLoading] = useState(false)
   const [transferError, setTransferError] = useState('')
+  const [ownerPrivateKey, setOwnerPrivateKey] = useState('')
 
   const handleGet = async () => {
     if (!assetKey) {
@@ -53,6 +54,7 @@ export default function GetCard({ currentAddress }) {
       form.append('asset_key', assetKey)
       form.append('to_address', toAddress)
       if (currentAddress) form.append('user_address', currentAddress)
+      if (ownerPrivateKey) form.append('owner_private_key', ownerPrivateKey)
       const res = await axios.post(`${API_BASE}/asset/transfer`, form)
       setTransferTx(res.data.tx || res.data.tx_hash || 'Đã gửi giao dịch chuyển quyền.')
     } catch (e) {
@@ -129,6 +131,13 @@ export default function GetCard({ currentAddress }) {
                   value={toAddress}
                   onChange={(e) => setToAddress(e.target.value)}
                   placeholder="Địa chỉ nhận (to_address)"
+                  className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+                />
+                <input
+                  value={ownerPrivateKey}
+                  onChange={(e) => setOwnerPrivateKey(e.target.value)}
+                  placeholder="Owner's private key (0x...)"
+                  type="password"
                   className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
                 />
                 <div>

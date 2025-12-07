@@ -278,12 +278,15 @@ async def asset_transfer(
     asset_key: str = Form(...),
     to_address: str = Form(...),
     user_address: str = Form(None),
+    owner_private_key: str = Form(None),
     x_user_address: str = Header(None)
 ):
     """
     Chuyển quyền sở hữu asset sang địa chỉ khác.
     - Chỉ asset owner (current owner trong registry) có quyền gọi.
     - user_address phải là hiện tại owner của asset.
+    - Nếu owner_private_key được cung cấp, backend sẽ ký tx với private key đó.
+      Nếu không, sẽ dùng PRIVATE_KEY từ .env (fallback).
     """
     # Kiểm tra quyền asset owner
     if user_address or x_user_address:
@@ -306,11 +309,19 @@ async def asset_transfer(
     registry, nft, w3, owner = get_contracts()
     asset_key_bytes = Web3.keccak(text=asset_key)
 
+    # Nếu có owner_private_key, dùng nó để ký tx; nếu không, dùng owner từ .env
+    signer = owner
+    if owner_private_key:
+        try:
+            signer = w3.eth.account.from_key(owner_private_key)
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid owner_private_key: {str(e)}")
+
     try:
         tx_hash = build_and_send(
             w3,
             registry.functions.transferAsset(asset_key_bytes, to_addr),
-            owner,
+            signer,
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Transfer failed: {str(e)}")
